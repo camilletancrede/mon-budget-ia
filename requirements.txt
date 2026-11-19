@@ -1,0 +1,6 @@
+streamlit
+pandas
+altair
+pdfplumber
+joblib
+scikit-learn
