@@ -27,7 +27,7 @@ RACINE = Path(__file__).resolve().parent.parent
 DOSSIER_VALIDATION = RACINE / "donnees" / "validation"
 DOSSIER_RESULTATS = RACINE / "resultats"
 
-# Charger notre nouveau modèle entraîné
+# Charger notre modèle entraîné (aucun réentraînement)
 modele = joblib.load(
     RACINE / "modele_categories_nouveau.pkl"
 )
@@ -83,7 +83,7 @@ y_test = donnees_test["Categorie_confirmee"]
 
 
 # ============================================================
-# 3. TESTER LE NOUVEAU MODELE
+# 3. TESTER LE MODELE
 # ============================================================
 
 # Faire prédire les catégories par l'IA
@@ -148,13 +148,87 @@ print("\nNombre d'erreurs :", len(erreurs))
 print("\nTransactions mal catégorisées :")
 print(erreurs.to_string(index=False))
 
+
+# ============================================================
+# 5. ANALYSER LA CONFIANCE SELON LES COULEURS DU PROTOTYPE
+# ============================================================
+
+# Même seuils que dans app.py : vert >= 75 %, orange >= 50 %, rouge < 50 %.
+SEUIL_CONFIANCE_ELEVEE = 0.75
+SEUIL_CONFIANCE_MOYENNE = 0.50
+
+# Pour chaque transaction, conserver la probabilité maximale parmi
+# les 11 catégories. Il s'agit du score du modèle, pas de l'accuracy.
+probabilites = modele.predict_proba(X_test)
+donnees_test["Score_confiance"] = probabilites.max(axis=1)
+
+# Attribuer une couleur à chaque transaction selon son score.
+# right=False : 0,50 est orange et 0,75 est vert.
+donnees_test["Couleur"] = pd.cut(
+    donnees_test["Score_confiance"],
+    bins=[float("-inf"), SEUIL_CONFIANCE_MOYENNE,
+          SEUIL_CONFIANCE_ELEVEE, float("inf")],
+    labels=["Rouge", "Orange", "Vert"],
+    right=False
+)
+
+# Résumer la performance observée pour chaque couleur.
+analyse = (
+    donnees_test.groupby("Couleur", observed=False)
+    .agg(
+        Transactions=("Correct", "size"),
+        Correctes=("Correct", "sum"),
+        Score_moyen=("Score_confiance", "mean")
+    )
+    .reindex(["Vert", "Orange", "Rouge"])
+    .reset_index()
+)
+
+analyse["Erreurs"] = analyse["Transactions"] - analyse["Correctes"]
+
+# Calculer le taux d'erreur uniquement lorsque le groupe contient des lignes.
+analyse["Taux_erreur_%"] = (
+    100 * analyse["Erreurs"] / analyse["Transactions"].replace(0, float("nan"))
+).round(1)
+
+analyse["Score_moyen_%"] = (100 * analyse["Score_moyen"]).round(1)
+analyse = analyse.drop(columns="Score_moyen")
+
+print("\n=== CONFIANCE ET ERREURS PAR COULEUR ===")
+print(analyse.to_string(index=False, na_rep="N/A"))
+
+# Parmi toutes les erreurs, quelle proportion est signalée en rouge ?
+nombre_erreurs = int((~donnees_test["Correct"]).sum())
+erreurs_rouges = int((
+    (~donnees_test["Correct"]) & (donnees_test["Couleur"] == "Rouge")
+).sum())
+
+print("\n=== ERREURS REPEREES PAR LE ROUGE ===")
+if nombre_erreurs > 0:
+    print(
+        f"{erreurs_rouges} erreur(s) sur {nombre_erreurs} sont rouges, "
+        f"soit {erreurs_rouges / nombre_erreurs * 100:.1f} % des erreurs."
+    )
+else:
+    print("Aucune erreur observée sur cet ensemble de test.")
+
+print(
+    "Attention : les probabilités du modèle ne sont pas nécessairement "
+    "calibrées. Cette analyse est exploratoire (90 relevés fictifs attendus)."
+)
+
+
+# ============================================================
+# 6. ENREGISTRER LES RESULTATS
+# ============================================================
+
 # S'assurer que le dossier des résultats existe
 DOSSIER_RESULTATS.mkdir(
     parents=True,
     exist_ok=True
 )
 
-# Enregistrer toutes les prédictions pour les analyser
+# Enregistrer les prédictions, scores et couleurs transaction par transaction.
 donnees_test.to_csv(
     DOSSIER_RESULTATS / "bilan_test_releves.csv",
     sep=";",
@@ -162,4 +236,13 @@ donnees_test.to_csv(
     encoding="utf-8-sig"
 )
 
+# Enregistrer le résumé des performances par couleur.
+analyse.to_csv(
+    DOSSIER_RESULTATS / "analyse_confiance_releves.csv",
+    sep=";",
+    index=False,
+    encoding="utf-8-sig"
+)
+
 print("\n✅ Résultats enregistrés dans resultats/bilan_test_releves.csv")
+print("✅ Résumé enregistré dans resultats/analyse_confiance_releves.csv")
