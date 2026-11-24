@@ -20,17 +20,21 @@ from sklearn.metrics import (
 # 1. CHARGER LE MODELE ET LES DONNEES DE REFERENCE
 # ============================================================
 
-# Trouver le dossier du projet
-dossier = Path(__file__).resolve().parent
+# Trouver le dossier principal du projet
+RACINE = Path(__file__).resolve().parent.parent
 
-# Charger notre NOUVEAU modèle entraîné
+# Définir les dossiers utilisés
+DOSSIER_VALIDATION = RACINE / "donnees" / "validation"
+DOSSIER_RESULTATS = RACINE / "resultats"
+
+# Charger notre nouveau modèle entraîné
 modele = joblib.load(
-    dossier / "modele_categories_nouveau.pkl"
+    RACINE / "modele_categories_nouveau.pkl"
 )
 
-# Charger les 90 transactions catégorisées manuellement
+# Charger les transactions catégorisées manuellement
 validation = pd.read_excel(
-    dossier / "validation_categories_rempli.xlsx"
+    DOSSIER_VALIDATION / "validation_categories_rempli.xlsx"
 )
 
 # Conserver les descriptions et les catégories confirmées
@@ -144,12 +148,18 @@ print("\nNombre d'erreurs :", len(erreurs))
 print("\nTransactions mal catégorisées :")
 print(erreurs.to_string(index=False))
 
+# S'assurer que le dossier des résultats existe
+DOSSIER_RESULTATS.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
 # Enregistrer toutes les prédictions pour les analyser
 donnees_test.to_csv(
-    dossier / "bilan_test_releves.csv",
+    DOSSIER_RESULTATS / "bilan_test_releves.csv",
     sep=";",
     index=False,
     encoding="utf-8-sig"
 )
 
-print("\n✅ Résultats enregistrés dans bilan_test_releves.csv")
+print("\n✅ Résultats enregistrés dans resultats/bilan_test_releves.csv")
