@@ -1,0 +1,17 @@
+# Base de données locale
+*.db
+
+# Fichiers temporaires Python
+__pycache__/
+*.pyc
+
+# Environnements virtuels
+.venv/
+venv/
+
+# Configurations sensibles
+.env
+.streamlit/secrets.toml
+
+# Fichiers macOS
+.DS_Store
