@@ -4,3 +4,4 @@ altair
 pdfplumber
 joblib
 scikit-learn
+streamlit-aggrid==1.2.1.post2
