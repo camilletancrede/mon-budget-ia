@@ -75,26 +75,10 @@ function(params) {
     "__SEUIL_MOYEN__", str(SEUIL_CONFIANCE_MOYENNE)
 ))
 
-# Petit crayon à droite de CHAQUE catégorie pour montrer qu'elle est modifiable.
 RENDU_CATEGORIE = JsCode("""
 function(params) {
-    const ligne = document.createElement('span');
-    ligne.style.display = 'flex';
-    ligne.style.alignItems = 'center';
-    ligne.style.justifyContent = 'space-between';
-    ligne.style.width = '100%';
-    ligne.style.gap = '8px';
-
-    const texte = document.createElement('span');
-    texte.textContent = params.value == null ? '' : String(params.value);
-    const crayon = document.createElement('span');
-    crayon.textContent = '✎';
-    crayon.title = 'Cliquer pour modifier la catégorie';
-    crayon.style.opacity = '0.70';
-
-    ligne.appendChild(texte);
-    ligne.appendChild(crayon);
-    return ligne;
+    const categorie = params.value == null ? '' : String(params.value);
+    return categorie + '  ✎';
 }
 """)
 
