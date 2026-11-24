@@ -1,6 +1,6 @@
 # ============================================================
 # TECH60711 - MON BUDGET IA
-# Application Streamlit - version 3
+# Application Streamlit - version 4 : catégories éditables et confiance colorée
 # ============================================================
 
 from pathlib import Path
@@ -16,6 +16,7 @@ import joblib
 import pandas as pd
 import pdfplumber
 import streamlit as st
+from st_aggrid import AgGrid, GridOptionsBuilder, JsCode
 
 
 # ============================================================
@@ -41,6 +42,46 @@ COULEURS_CATEGORIES = {
     "Épicerie": "#a8dadc",         # Turquoise
 }
 CATEGORIES = list(COULEURS_CATEGORIES)
+
+# Seuils exploratoires : à valider sur le jeu de test PDF étiqueté.
+# Le score predict_proba n'est pas nécessairement une probabilité calibrée.
+SEUIL_CONFIANCE_ELEVEE = 0.75
+SEUIL_CONFIANCE_MOYENNE = 0.50
+
+# Appliquer la couleur au FOND de la cellule éditable, jamais à la ligne entière.
+# La couleur représente la confiance de la prédiction ORIGINALE de l'IA.
+# Après une correction humaine, le fond devient neutre (mauve clair).
+STYLE_CATEGORIE = JsCode("""
+function(params) {
+    const score = Number(params.data && params.data.Confiance_IA);
+    const categorieOriginale = params.data && params.data.Categorie_initiale;
+    const couleurTexte = '#332D3A';
+
+    if (params.value !== categorieOriginale) {
+        return {backgroundColor: 'rgba(137, 116, 165, 0.15)', color: couleurTexte};
+    }
+    if (!Number.isFinite(score)) {
+        return {backgroundColor: 'rgba(156, 163, 175, 0.15)', color: couleurTexte};
+    }
+    if (score >= __SEUIL_ELEVE__) {
+        return {backgroundColor: 'rgba(46, 160, 92, 0.15)', color: couleurTexte};
+    }
+    if (score >= __SEUIL_MOYEN__) {
+        return {backgroundColor: 'rgba(235, 150, 40, 0.15)', color: couleurTexte};
+    }
+    return {backgroundColor: 'rgba(224, 70, 75, 0.15)', color: couleurTexte};
+}
+""".replace("__SEUIL_ELEVE__", str(SEUIL_CONFIANCE_ELEVEE)).replace(
+    "__SEUIL_MOYEN__", str(SEUIL_CONFIANCE_MOYENNE)
+))
+
+RENDU_CATEGORIE = JsCode("""
+function(params) {
+    const categorie = params.value == null ? '' : String(params.value);
+    return categorie + '  ✎';
+}
+""")
+
 
 st.set_page_config(
     page_title="Mon budget IA",
@@ -777,8 +818,13 @@ elif page == "Importer des relevés":
             try:
                 modele = charger_modele()
                 textes = depenses["Description"].apply(nettoyer_description)
-                depenses["Suggestion IA"] = modele.predict(textes.tolist())
-                depenses["Ma catégorie"] = depenses["Suggestion IA"]
+                # Conserver la suggestion originale, même si l'utilisateur la corrige.
+                depenses["Categorie_initiale"] = modele.predict(textes.tolist())
+                depenses["Categorie_suggeree"] = depenses["Categorie_initiale"]
+
+                # Score de la catégorie la plus probable (sans réentraînement).
+                scores = modele.predict_proba(textes.tolist())
+                depenses["Confiance_IA"] = scores.max(axis=1)
                 depenses["Inclure"] = True
             except Exception as erreur:
                 st.error(f"Impossible de charger le modèle IA : {erreur}")
@@ -830,8 +876,8 @@ elif page == "Importer des relevés":
                 )
                 st.dataframe(
                     apercu[
-                        ["Inclure", "Membre", "Date", "Description", "Montant", "Ma catégorie", "Fichier"]
-                    ],
+                        ["Inclure", "Membre", "Date", "Description", "Montant", "Categorie_suggeree", "Fichier"]
+                    ].rename(columns={"Categorie_suggeree": "Catégorie validée"}),
                     hide_index=True, width="stretch",
                 )
                 st.caption(
@@ -842,54 +888,113 @@ elif page == "Importer des relevés":
             else:
                 st.subheader("4. Corriger les catégories ✏️")
                 st.write(
-                    "La colonne **Suggestion IA** montre la prédiction originale. "
-                    "Cliquez dans **Ma catégorie ✏️** pour la changer. "
-                    "Décochez **Inclure** pour ne pas enregistrer une dépense."
+                    "Cliquez dans une cellule **Catégorie suggérée ✏️** pour choisir "
+                    "une autre catégorie. Décochez **Inclure** pour ignorer une dépense."
                 )
                 st.caption(
-                    "Les modifications ne seront enregistrées qu'après "
-                    "avoir cliqué sur le bouton de validation."
+                    "Couleur du fond = confiance estimée de l'IA : "
+                    "🟢 élevée (≥ 75 %) · 🟡 moyenne (50 % à < 75 %) · 🔴 faible (< 50 %). "
+                    "Une catégorie corrigée apparaît sur fond mauve clair. "
+                    "Ces seuils sont provisoires et ne garantissent pas "
+                    "l'exactitude des prédictions."
+                )
+                st.caption(
+                    "Les modifications ne sont enregistrées qu'après avoir cliqué "
+                    "sur « Valider et enregistrer les dépenses »."
                 )
 
+                # Une seule colonne de catégorie visible, modifiable et colorée.
                 colonnes = [
                     "Inclure", "Membre", "Date", "Description", "Montant",
-                    "Suggestion IA", "Ma catégorie", "Fichier",
+                    "Categorie_suggeree", "Fichier",
+                    "Categorie_initiale", "Confiance_IA",
                 ]
+                donnees_grille = apercu[colonnes].copy().reset_index(drop=True)
+                donnees_grille.insert(0, "Ligne_id", range(len(donnees_grille)))
+                donnees_grille["Date"] = pd.to_datetime(
+                    donnees_grille["Date"]
+                ).dt.strftime("%d/%m/%Y")
 
-                with st.form(
-                    f"validation_analyse_{st.session_state['analyse_revision']}"
-                ):
-                    corrections = st.data_editor(
-                        apercu[colonnes].copy(),
-                        hide_index=True,
-                        width="stretch",
-                        num_rows="fixed",
-                        disabled=[
-                            "Membre", "Date", "Description", "Montant",
-                            "Suggestion IA", "Fichier",
-                        ],
-                        column_config={
-                            "Inclure": st.column_config.CheckboxColumn(
-                                "Inclure ✓",
-                                help="Décochez pour exclure cette dépense.",
-                            ),
-                            "Date": st.column_config.DateColumn(
-                                "Date", format="DD/MM/YYYY"
-                            ),
-                            "Montant": st.column_config.NumberColumn(
-                                "Montant ($)", format="%.2f"
-                            ),
-                            "Ma catégorie": st.column_config.SelectboxColumn(
-                                "Ma catégorie ✏️",
-                                options=CATEGORIES,
-                                required=True,
-                            ),
-                        },
-                    )
-                    confirmer = st.form_submit_button(
-                        "✓ Valider et enregistrer les dépenses",
-                        type="primary",
-                    )
+                gb = GridOptionsBuilder.from_dataframe(donnees_grille)
+                gb.configure_default_column(
+                    editable=False, resizable=True, sortable=False, filter=False
+                )
+                gb.configure_column("Ligne_id", hide=True)
+                gb.configure_column("Categorie_initiale", hide=True)
+                gb.configure_column("Confiance_IA", hide=True)
+                gb.configure_column(
+                    "Inclure", headerName="Inclure ✓", editable=True,
+                    cellRenderer="agCheckboxCellRenderer",
+                    cellEditor="agCheckboxCellEditor", width=110,
+                )
+                gb.configure_column("Membre", width=115)
+                gb.configure_column("Date", width=115)
+                gb.configure_column("Description", minWidth=280, flex=2)
+                gb.configure_column(
+                    "Montant", headerName="Montant ($)", width=120,
+                    valueFormatter=JsCode("""function(p) {
+                        return Number(p.value).toFixed(2);
+                    }"""),
+                )
+                gb.configure_column(
+                    "Categorie_suggeree",
+                    headerName="Catégorie suggérée ✏️",
+                    editable=True,
+                    singleClickEdit=True,
+                    cellEditor="agSelectCellEditor",
+                    cellEditorParams={"values": CATEGORIES},
+                    cellStyle=STYLE_CATEGORIE,
+                    cellRenderer=RENDU_CATEGORIE,
+                    minWidth=190,
+                    flex=1,
+                )
+                gb.configure_column("Fichier", minWidth=140)
+                options = gb.build()
+                options["getRowId"] = JsCode(
+                    "function(p) { return String(p.data.Ligne_id); }"
+                )
+                options["stopEditingWhenCellsLoseFocus"] = True
+                options["suppressMovableColumns"] = True
+
+                retour = AgGrid(
+                    donnees_grille,
+                    gridOptions=options,
+                    key=f"analyse_categories_{st.session_state['analyse_revision']}",
+                    height=min(530, 88 + len(donnees_grille) * 36),
+                    theme="streamlit",
+                    allow_unsafe_jscode=True,
+                    update_on=["cellValueChanged"],
+                    data_return_mode="AS_INPUT",
+                    reload_data=False,
+                    enable_enterprise_modules=False,
+                )
+
+                # Lire les modifications renvoyées par le tableau, dans le bon ordre.
+                corrections = pd.DataFrame(retour["data"])
+                if len(corrections) != len(apercu):
+                    st.error("Impossible de récupérer les corrections du tableau.")
+                    st.stop()
+                corrections["Ligne_id"] = pd.to_numeric(
+                    corrections["Ligne_id"], errors="raise"
+                ).astype(int)
+                corrections = corrections.sort_values("Ligne_id").reset_index(drop=True)
+                if corrections["Ligne_id"].tolist() != list(range(len(apercu))):
+                    st.error("L'ordre des transactions ne peut pas être vérifié.")
+                    st.stop()
+
+                # Conserver les modifications dans la session en cas de rafraîchissement.
+                st.session_state["analyse_apercu"]["Categorie_suggeree"] = (
+                    corrections["Categorie_suggeree"].tolist()
+                )
+                st.session_state["analyse_apercu"]["Inclure"] = (
+                    corrections["Inclure"].astype(bool).tolist()
+                )
+
+                confirmer = st.button(
+                    "✓ Valider et enregistrer les dépenses",
+                    type="primary",
+                    key=f"enregistrer_analyse_{st.session_state['analyse_revision']}",
+                )
 
                 if confirmer:
                     ajouts = doublons = exclusions = modifs = 0
@@ -900,11 +1005,11 @@ elif page == "Importer des relevés":
                             if not bool(ligne["Inclure"]):
                                 exclusions += 1
                                 continue
-                            categorie = str(ligne["Ma catégorie"])
+                            categorie = str(ligne["Categorie_suggeree"])
                             if categorie not in CATEGORIES:
                                 exclusions += 1
                                 continue
-                            if categorie != originale["Suggestion IA"]:
+                            if categorie != originale["Categorie_initiale"]:
                                 modifs += 1
                             curseur = con.execute("""
                                 INSERT OR IGNORE INTO transactions
@@ -927,8 +1032,8 @@ elif page == "Importer des relevés":
                         con.commit()
                     finally:
                         con.close()
-                    st.session_state["analyse_apercu"]["Ma catégorie"] = (
-                        corrections["Ma catégorie"].tolist()
+                    st.session_state["analyse_apercu"]["Categorie_suggeree"] = (
+                        corrections["Categorie_suggeree"].tolist()
                     )
                     st.session_state["analyse_apercu"]["Inclure"] = (
                         corrections["Inclure"].tolist()
