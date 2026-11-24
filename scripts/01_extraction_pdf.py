@@ -10,8 +10,24 @@ import unicodedata
 import pandas as pd
 import pdfplumber
 
-# Dossier contenant ce script et les fichiers PDF
-DOSSIER = Path(__file__).resolve().parent
+
+# ============================================================
+# 1. CONFIGURATION DES DOSSIERS
+# ============================================================
+
+# Dossier principal du projet mon-budget-ia
+RACINE = Path(__file__).resolve().parent.parent
+
+# Dossier contenant les relevés bancaires fictifs
+DOSSIER_PDF = RACINE / "donnees" / "releves_fictifs"
+
+# Dossier où enregistrer les résultats de l'extraction
+DOSSIER_RESULTATS = RACINE / "resultats"
+
+
+# ============================================================
+# 2. EXPRESSIONS REGULIERES ET MOIS
+# ============================================================
 
 # Détecter les montants avec exactement deux décimales
 # et éviter de confondre les numéros de magasins avec les montants
@@ -36,6 +52,10 @@ MOIS = {
     "dec": 12, "decembre": 12, "december": 12,
 }
 
+
+# ============================================================
+# 3. FONCTIONS DE NETTOYAGE ET DE CONVERSION
+# ============================================================
 
 def sans_accents(texte):
     # Retirer les accents pour reconnaître les mois
@@ -63,6 +83,10 @@ def en_nombre(texte):
 
     return round(float(valeur), 2)
 
+
+# ============================================================
+# 4. IDENTIFIER LES DATES ET DESCRIPTIONS
+# ============================================================
 
 def date_et_description(ligne, annee):
     # Format ISO : 2026-10-01 DESCRIPTION
@@ -122,6 +146,10 @@ def date_et_description(ligne, annee):
     return None, None
 
 
+# ============================================================
+# 5. IDENTIFIER LE SOLDE INITIAL
+# ============================================================
+
 def solde_initial(lignes):
     # Chercher le solde d'ouverture du compte
     marqueurs = (
@@ -152,6 +180,10 @@ def solde_initial(lignes):
 
     return None
 
+
+# ============================================================
+# 6. EXTRAIRE LES TRANSACTIONS D'UN PDF
+# ============================================================
 
 def extraire_pdf(chemin):
     # Ouvrir le PDF et lire toutes ses pages
@@ -272,11 +304,15 @@ def extraire_pdf(chemin):
     return operations
 
 
+# ============================================================
+# 7. EXECUTION PRINCIPALE
+# ============================================================
+
 def main():
     # Regrouper les opérations de tous les PDF du dossier
     toutes = []
 
-    for fichier in sorted(DOSSIER.glob("*.pdf")):
+    for fichier in sorted(DOSSIER_PDF.glob("*.pdf")):
         try:
             operations = extraire_pdf(fichier)
 
@@ -293,7 +329,7 @@ def main():
     if not toutes:
         print(
             "Aucune transaction détectée. "
-            "Place les relevés PDF dans ce dossier."
+            "Vérifie les relevés dans donnees/releves_fictifs/."
         )
         return
 
@@ -307,7 +343,7 @@ def main():
 
     # Enregistrer toutes les opérations
     tableau.to_csv(
-        DOSSIER / "transactions_extraites.csv",
+        DOSSIER_RESULTATS / "transactions_extraites.csv",
         sep=";",
         index=False,
         encoding="utf-8-sig"
@@ -315,7 +351,7 @@ def main():
 
     # Enregistrer les dépenses à catégoriser
     depenses.to_csv(
-        DOSSIER / "depenses_a_categoriser.csv",
+        DOSSIER_RESULTATS / "depenses_a_categoriser.csv",
         sep=";",
         index=False,
         encoding="utf-8-sig"
@@ -335,6 +371,9 @@ def main():
     print("⚠️ Vérifier les montants et les descriptions extraites.")
 
 
-# Exécuter le programme
+# ============================================================
+# 8. LANCEMENT DU PROGRAMME
+# ============================================================
+
 if __name__ == "__main__":
     main()
