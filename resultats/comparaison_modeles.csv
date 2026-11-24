@@ -1,0 +1,5 @@
+﻿Variante;Classes_equilibrees;Accuracy_validation;F1_macro_validation
+caracteres;False;0.9513;0.9447
+caracteres;True;0.9543;0.9379
+mots;True;0.9346;0.9378
+mots;False;0.9224;0.9199
