@@ -45,8 +45,8 @@ CATEGORIES = list(COULEURS_CATEGORIES)
 
 # Seuils exploratoires : à valider sur le jeu de test PDF étiqueté.
 # Le score predict_proba n'est pas nécessairement une probabilité calibrée.
-SEUIL_CONFIANCE_ELEVEE = 0.85
-SEUIL_CONFIANCE_MOYENNE = 0.60
+SEUIL_CONFIANCE_ELEVEE = 0.75
+SEUIL_CONFIANCE_MOYENNE = 0.50
 
 # Appliquer la couleur au FOND de la cellule éditable, jamais à la ligne entière.
 # La couleur représente la confiance de la prédiction ORIGINALE de l'IA.
@@ -892,11 +892,11 @@ elif page == "Importer des relevés":
                     "une autre catégorie. Décochez **Inclure** pour ignorer une dépense."
                 )
                 st.caption(
-                    "Couleur du fond = confiance de la suggestion initiale : "
-                    "🟢 élevée (≥ 85 %) · 🟠 moyenne (60–84 %) · 🔴 faible (< 60 %). "
+                    "Couleur du fond = confiance estimée de l'IA : "
+                    "🟢 élevée (≥ 75 %) · 🟡 moyenne (50 % à < 75 %) · 🔴 faible (< 50 %). "
                     "Une catégorie corrigée apparaît sur fond mauve clair. "
-                    "Ces seuils sont provisoires; un score de 85 % ne garantit pas "
-                    "85 % de prédictions correctes."
+                    "Ces seuils sont provisoires et ne garantissent pas "
+                    "l'exactitude des prédictions."
                 )
                 st.caption(
                     "Les modifications ne sont enregistrées qu'après avoir cliqué "
