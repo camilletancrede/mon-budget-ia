@@ -1,0 +1,91 @@
+﻿Description;Categorie_confirmee;Categorie_predite;Correct
+SKIP PLATS;Restaurants;Restaurants;True
+AMAZON.CA;Magasinage;Magasinage;True
+PETRO-CANADA;Transport;Transport;True
+SPOTIFY CA;Abonnements;Abonnements;True
+METRO EPICERIE;Épicerie;Épicerie;True
+PHARMAPRIX;Santé et soins;Santé et soins;True
+HYDRO-QUEBEC;Logement;Logement;True
+CANADIAN TIRE;Magasinage;Transport;False
+MAGASIN VÊTEMENTS;Magasinage;Logement;False
+STM MONTREAL;Transport;Transport;True
+STARBUCKS CAFE;Restaurants;Restaurants;True
+TIM HORTONS;Restaurants;Restaurants;True
+UBER COURSE;Transport;Transport;True
+LA BAIE;Magasinage;Restaurants;False
+TIM HORTONS;Restaurants;Restaurants;True
+APPLE.COM/BILL;Abonnements;Magasinage;False
+GAZ METRO;Logement;Épicerie;False
+NETFLIX.COM;Abonnements;Abonnements;True
+PAIEMENT PREAUTORISE HYDRO-QUEBEC FACT 874221;Logement;Logement;True
+ACHAT INTERAC IGA EXTRA 7755 LAVAL QC;Épicerie;Épicerie;True
+ACHAT INTERAC STM OPUS EN LIGNE MONTREAL QC;Transport;Transport;True
+ACHAT INTERAC CAFE DEPOT CHOMEDEY LAVAL QC;Restaurants;Restaurants;True
+PRELEVEMENT AUTOMATIQUE BELL MOBILITE 6678432;Logement;Logement;True
+ACHAT INTERAC PHARMAPRIX #1432 LAVAL QC;Santé et soins;Santé et soins;True
+ACHAT INTERAC WALMART SUPERCENTRE #3012 LAVAL QC;Magasinage;Épicerie;False
+ACHAT INTERAC ULTRAMAR 9923 LAVAL QC;Transport;Transport;True
+ACHAT INTERAC TIM HORTONS #2481 LAVAL QC;Restaurants;Restaurants;True
+PRELEVEMENT AUTOMATIQUE NETFLIX.COM;Abonnements;Abonnements;True
+FRAIS RETRAIT GUICHET;Frais bancaires;Frais bancaires;True
+ACHAT INTERAC RENAUD-BRAY CARREFOUR LAVAL QC;Magasinage;Loisirs;False
+ACHAT INTERAC COSTCO WHOLESALE #547 LAVAL QC;Épicerie;Épicerie;True
+ACHAT INTERAC SAQ SUCC 23015 LAVAL QC;Épicerie;Épicerie;True
+PAIEMENT PREAUTORISE ASSURANCES BENEVA AUTO;Transport;Logement;False
+ACHAT INTERAC DOLLARAMA #1875 LAVAL QC;Magasinage;Magasinage;True
+ACHAT INTERAC UBER *TRIP HELP.UBER.COM;Transport;Transport;True
+ACHAT INTERAC AUBAINERIE 1083 LAVAL QC;Magasinage;Épicerie;False
+PRELEVEMENT AUTOMATIQUE SPOTIFY P1234FAMILLE;Abonnements;Abonnements;True
+ACHAT INTERAC JEAN COUTU #089 LAVAL QC;Santé et soins;Santé et soins;True
+ACHAT INTERAC AMAZON.CA MKTPL*2Q3T8;Magasinage;Magasinage;True
+VIREMENT INTERAC ENVOYE LOYER JULIE MARTEL;Logement;Logement;True
+ACHAT INTERAC PROVIGO LE MARCHE LAVAL QC;Épicerie;Épicerie;True
+ACHAT INTERAC SHELL C01645 LAVAL QC;Transport;Transport;True
+ACHAT INTERAC CINEMA CINEPLEX LAVAL QC;Loisirs;Loisirs;True
+PAIEMENT PREAUTORISE HYDRO-QUEBEC FACT 874221;Logement;Logement;True
+ACHAT INTERAC MONDOU LAVAL QC;Animaux;Animaux;True
+ACHAT INTERAC METRO PLUS 4451 LAVAL QC;Épicerie;Épicerie;True
+ACHAT INTERAC SEPHORA.CA;Santé et soins;Magasinage;False
+ACHAT INTERAC HOME DEPOT #7086 LAVAL QC;Magasinage;Logement;False
+PRELEVEMENT AUTOMATIQUE VIDEOTRON INTERNET;Logement;Logement;True
+ACHAT INTERAC MCDONALD'S #3621 LAVAL QC;Restaurants;Restaurants;True
+ACHAT INTERAC COUCHE-TARD 2749 LAVAL QC;Restaurants;Transport;False
+FRAIS FORFAIT MENSUEL COMPTE CHEQUES;Frais bancaires;Frais bancaires;True
+POS PURCHASE NO FRILLS #1987 OTTAWA ON;Épicerie;Épicerie;True
+PRE-AUTH PMT ENBRIDGE GAS 005321;Logement;Logement;True
+POS PURCHASE ESSO 04231 NEPEAN ON;Transport;Transport;True
+INTERAC PURCHASE TIM HORTONS #1782 ON;Restaurants;Restaurants;True
+INTERAC PURCHASE WINNERS #031 OTTAWA ON;Magasinage;Magasinage;True
+E-TRANSFER SENT RENT / M. PATEL;Logement;Logement;True
+POS PURCHASE FARM BOY #025 OTTAWA ON;Épicerie;Épicerie;True
+PRE-AUTH PMT ROGERS WIRELESS 8432;Logement;Logement;True
+POS PURCHASE SHOPPERS DRUG MART 1170;Santé et soins;Santé et soins;True
+POS PURCHASE CANADIAN TIRE #0381 ON;Magasinage;Transport;False
+POS PURCHASE PRESTO AUTORELOAD 412398;Transport;Transport;True
+VISA DEBIT SQ *NORTH CAFE OTTAWA;Restaurants;Restaurants;True
+POS PURCHASE COSTCO WHOLESALE #531;Épicerie;Épicerie;True
+PRE-AUTH PMT DISNEYPLUS.COM;Abonnements;Abonnements;True
+NON-NETWORK ATM SERVICE FEE;Frais bancaires;Frais bancaires;True
+VISA DEBIT AMZN MKTP CA*8K7P02;Magasinage;Restaurants;False
+POS PURCHASE PET VALU #2417;Animaux;Animaux;True
+VISA DEBIT UBER *TRIP HELP.UBER.COM;Transport;Transport;True
+PRE-AUTH PMT GOODLIFE FITNESS;Abonnements;Loisirs;False
+POS PURCHASE REXALL #5632 OTTAWA;Santé et soins;Santé et soins;True
+POS PURCHASE METRO #319 OTTAWA ON;Épicerie;Épicerie;True
+VISA DEBIT SKIPTHEDISHES*ORDER;Restaurants;Restaurants;True
+POS PURCHASE INDIGO BOOKS #206;Magasinage;Loisirs;False
+E-TRANSFER SENT J. RIVERA UTILITIES;Logement;Logement;True
+POS PURCHASE IKEA OTTAWA ON;Magasinage;Logement;False
+PRE-AUTH PMT CRAVE TV;Abonnements;Abonnements;True
+POS PURCHASE PETRO-CANADA #1142;Transport;Transport;True
+VISA DEBIT WALMART.CA ORDER 6293;Magasinage;Épicerie;False
+POS PURCHASE LCBO #019 OTTAWA;Épicerie;Restaurants;False
+PRE-AUTH PMT OTTAWA HYDRO 085401;Logement;Logement;True
+POS PURCHASE DOLLARAMA #634 OTTAWA;Magasinage;Magasinage;True
+VISA DEBIT AIR CANADA WEB*029381;Voyage;Voyage;True
+POS PURCHASE BEST BUY #935 OTTAWA;Magasinage;Magasinage;True
+VISA DEBIT APPLE.COM/BILL;Abonnements;Magasinage;False
+POS PURCHASE LOBLAWS #1444 OTTAWA;Épicerie;Épicerie;True
+POS PURCHASE SHELL 20045 KANATA;Transport;Transport;True
+POS PURCHASE CINEPLEX #8407 OTTAWA;Loisirs;Loisirs;True
+MONTHLY ACCOUNT PACKAGE FEE;Frais bancaires;Frais bancaires;True
