@@ -24,17 +24,13 @@ from sklearn.metrics import (
 # 1. CONFIGURATION
 # ============================================================
 
-# Dossier contenant ce script et les fichiers CSV
-DOSSIER = Path(__file__).resolve().parent
+RACINE = Path(__file__).resolve().parent.parent
 
-# Fichiers à utiliser
-FICHIER_DEVELOPPEMENT = (
-    DOSSIER / "transactions_synthetiques_enrichies.csv"
-)
+DOSSIER_DONNEES = RACINE / "donnees" / "entrainement"
+DOSSIER_RESULTATS = RACINE / "resultats"
 
-FICHIER_TEST = (
-    DOSSIER / "transactions_synthetiques_test_reserve.csv"
-)
+FICHIER_DEVELOPPEMENT = DOSSIER_DONNEES / "transactions_synthetiques_enrichies.csv"
+FICHIER_TEST = DOSSIER_DONNEES / "transactions_synthetiques_test_reserve.csv"
 
 
 # ============================================================
@@ -346,10 +342,8 @@ def main():
 
     # Enregistrer les résultats dans un CSV
     classement.to_csv(
-        DOSSIER / "comparaison_modeles.csv",
-        sep=";",
-        index=False,
-        encoding="utf-8-sig"
+        DOSSIER_RESULTATS / "comparaison_modeles.csv",
+        sep=";", index=False, encoding="utf-8-sig"
     )
 
     # ========================================================
@@ -442,20 +436,19 @@ def main():
 
     # Exporter le tableau des prédictions
     bilan.to_csv(
-        DOSSIER / "predictions_test.csv",
-        sep=";",
-        index=False,
-        encoding="utf-8-sig"
+        DOSSIER_RESULTATS / "predictions_test.csv",
+        sep=";", index=False, encoding="utf-8-sig"
     )
 
     # ========================================================
     # 10. SAUVEGARDER LE NOUVEAU MODELE
     # ========================================================
 
-    # Conserver l'ancien modèle Streamlit intact
+    # Sauvegarder le modèle final à la racine du projet
+    # Attention : remplace le fichier existant du même nom
     joblib.dump(
         modele_final,
-        DOSSIER / "modele_categories_nouveau.pkl"
+        RACINE / "modele_categories_nouveau.pkl"
     )
 
     print("\n✅ Modèle sauvegardé !")
